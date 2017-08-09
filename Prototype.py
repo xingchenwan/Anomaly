@@ -1,6 +1,7 @@
 import pandas as pd
 import logging
 
+
 class Prototype(object):
     def __init__(self, input_series, window_size):
         if not isinstance(input_series, pd.Series):
@@ -17,13 +18,11 @@ class Prototype(object):
 
     def _series_detect(self):
         self.all_status = pd.Series(0, index=self.series.index)
-        self.all_score = pd.Series(0., index=self.series.index)
         ct = 0
         for i in range(0, len(self.series)):
             res = self.point_detect(i)
-            self.all_score.iloc[i] = res[1]
-            self.all_status.iloc[i] = res[0]
-            if res[0] != 0: ct += 1
+            self.all_status.iloc[i] = res
+            if res != 0: ct += 1
         self.processed = True
         logging.info("Proportion of anomalous points:" + str(ct / len(self.series)))
 
@@ -38,7 +37,7 @@ class Prototype(object):
         if loc - length <= 0: return None
         local_series = series.iloc[loc - length:loc]
         half_len = int(length/2)
-        if local_series[-half_len:].value_counts[0] / len(local_series) > 1/3:
+        if local_series[-half_len:].value_counts().iloc[0] / len(local_series) > 1/3:
             logging.warning("Boring Series Detected.")
             return None
         return local_series
