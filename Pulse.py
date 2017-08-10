@@ -4,7 +4,7 @@ import logging
 from scipy import stats
 import statsmodels.api as sm
 from settings import *
-from Detectors.Prototype import *
+from Prototype import *
 
 
 class ProbabilisticEWMA(Prototype):
@@ -263,3 +263,72 @@ class kNNCAD(Prototype):
     def _get_k_nearest_score(self, item, reference):
         arr = map(lambda x: self._get_mahanlanobis_dist(x, item), reference)
         return np.sum(np.partition(arr, self.k)[:self.k])
+
+
+class Entropy(Prototype):
+    def __init__(self, input_series, window_size=None, batch_size=None, bin_size=None, alpha=None):
+        self.label = "ENTROPY"
+        window_size = window_size if window_size and window_size > 0 else ENTROPY_WINDOW_SIZE
+        super(Entropy, self).__init__(input_series, window_size)
+        self.batch_size = batch_size if batch_size and (batch_size < window_size) else \
+            int(self.window_size / 10)
+        self.alpha = alpha if alpha else ENTROPY_ALPHA
+        self.n_bins = bin_size if bin_size else ENTROPY_N_BINS
+        self.t_stat = stats.chi2.isf(self.alpha, self.n_bins - 1)
+        self.hypothesis_freq_thres = 1
+        self.null_hypotheses_cnt = 0
+        self.null_hypotheses_collection = []
+        self.agreement_windows = []
+
+    def point_detect(self, loc):
+        local_series = self._get_local_series(self.series, self.window_size, loc)
+        if local_series is None: return np.nan
+        curr_pt = self.series.iloc[loc]
+        local_max = local_series.max() if curr_pt < local_series.max() else curr_pt
+        local_min = local_series.min() if curr_pt > local_series.min() else curr_pt
+        step = (local_max - local_min) / self.n_bins
+
+        curr_batch = self.series.iloc[loc-self.batch_size:]
+        discretized_curr_batch = [(c - local_min)/step for c in curr_batch]
+        P_curr = np.histogram(discretized_curr_batch,
+                              bins=self.n_bins,
+                              range=(0, self.n_bins),
+                              density=True)[0]
+
+        for i in range(0, self.window_size-self.batch_size, self.batch_size):
+            train_batch = local_series.iloc[i:i+self.batch_size]
+            discretized_train_batch = [(c - local_min)/step for c in train_batch]
+            P = np.histogram(discretized_train_batch,
+                             bins=self.n_bins,
+                             range=(0, self.n_bins),
+                             density=True)[0]
+            if self.null_hypotheses_cnt == 0:
+                self.null_hypotheses_collection.append(P)
+                self.agreement_windows.append(1)
+                self.null_hypotheses_cnt = 1
+            else:
+                matched_hypothesis = self._test_hypothesis(P)
+                if self._test_hypothesis(P) != -1:
+                    self.agreement_windows[matched_hypothesis] += 1
+                else:
+                    self.null_hypotheses_collection.append(P)
+                    self.agreement_windows.append(1)
+                    self.null_hypotheses_cnt += 1
+        res = self._test_hypothesis(P_curr)
+        if res == -1: return 1
+        elif self.agreement_windows[res] < self.hypothesis_freq_thres: return 1
+        return 0
+
+    def series_detect(self):
+        self._series_detect()
+        logging.info("Pulse.Entropy: Series processed!")
+
+    def _test_hypothesis(self, P):
+        min_entropy = np.inf
+        accepted_hypothesis_no = -1
+        for i in range(self.null_hypotheses_cnt):
+            entropy = 2 * self.batch_size * stats.entropy(P, self.null_hypotheses_collection[i])
+            if entropy < self.t_stat and entropy < min_entropy:
+                min_entropy = entropy
+                accepted_hypothesis_no = i
+        return accepted_hypothesis_no

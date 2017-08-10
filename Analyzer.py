@@ -1,8 +1,8 @@
 from settings import *
 import pandas as pd
 import logging
-import Detectors.Pulse as Pulse
-import Detectors.ChangePoint as Trend
+import Pulse as Pulse
+import ChangePoint as Trend
 import Assembler
 
 def analyze_entire_frame(frame):

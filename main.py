@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import Detectors.Pulse as Pulse
+import Pulse as Pulse
 import logging
 import Analyzer
 

@@ -1,4 +1,4 @@
-from Detectors.Prototype import *
+from Prototype import *
 import numpy as np
 from scipy import stats
 from settings import *

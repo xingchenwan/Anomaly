@@ -1,4 +1,4 @@
-from Detectors.Prototype import *
+from Prototype import *
 
 class MannKendall(Prototype):
     pass
