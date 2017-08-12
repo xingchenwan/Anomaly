@@ -33,7 +33,7 @@ def analyze_series(series_input):
     pulse_base = pd.concat(res_list, axis=1) if len(res_list) else None
     pulse_assembled = Assembler.pulse_assembler(pulse_base, mode='vote_abs', threshold=3)
 
-    if RUN_ZSCORE: res_list.append(Trend.ZScore(series_input).get_all_status())
+    if RUN_ZSCORE: res_list.append(Trend.TTest(series_input).get_all_status())
     trend_assembled = pd.DataFrame(res_list, axis=1) if len(res_list) else None
 
     return pulse_assembled, trend_assembled
