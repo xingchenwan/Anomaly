@@ -1,7 +1,9 @@
 # Anomaly
 
 Copyright 2017 Xingchen Wan
+
 Xingchen.Wan@deutsche-boerse.com | Deutsche Boerse AG | Frankfurt am Main, Germany
+
 Xingchen.Wan@st-annes.ox.ac.uk | Department of Engineering Science, University of Oxford | Oxford, UK
 
 
