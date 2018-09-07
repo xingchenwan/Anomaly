@@ -1,5 +1,10 @@
 # Anomaly
 
+Copyright 2017 Xingchen Wan
+Xingchen.Wan@deutsche-boerse.com | Deutsche Boerse AG | Frankfurt am Main, Germany
+Xingchen.Wan@st-annes.ox.ac.uk | Department of Engineering Science, University of Oxford | Oxford, UK
+
+
 Core algorithms of the gts anomaly detector
 
 Features an ensemble of algorithms (some of them are not implemented yet), including:
@@ -28,7 +33,5 @@ Theil-Sen's Slope
 
 ... and finally an stochastic gradient descent (SGD) incremental support vector machine / simple majority vote assembler to turn this
 collection of results into a final decision on whether a point is anomalous, and if so what kind of anomaly it is.
-
-Copyright 2017 Xingchen Wan - Deutsche Boerse AG
 
 With acknowledgements to LinkedIn Luminol, Skyline, Twitter Anomaly Detection respositories.
